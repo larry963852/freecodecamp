@@ -36,6 +36,13 @@ class Config:
         "https://smba.trafficmanager.net/amer/"
     )
 
+        # --- n8n Integration ---
+    # URL del webhook de n8n para procesar mensajes 1:1
+    N8N_PERSONAL_WEBHOOK_URL = os.getenv(
+        "N8N_PERSONAL_WEBHOOK_URL",
+        "https://special-lamp-xqwjww99xqxcp7r4-5678.app.github.dev/webhook/personal-intake"
+    )
+
     # --- Servidor ---
     PORT = int(os.getenv("PORT", "3978"))
 
