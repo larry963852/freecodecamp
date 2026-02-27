@@ -1,7 +1,6 @@
-"""
-DAPPS Bot — Servidor HTTP unificado.
+"""DAPPS Bot — Servidor HTTP unificado.
 
-Servidor único en puerto 3978 que ruteapor tipo de conversación:
+Servidor único en puerto 3978 que rutea por tipo de conversación:
   - personal (1:1)   → DappsPersonalBot
   - channel/groupchat → DappsChannelBot
 
@@ -9,6 +8,7 @@ Endpoints:
   POST /api/messages          → Bot Framework webhook (Azure Bot Service apunta aquí)
   POST /api/notify            → n8n → notificación proactiva al CANAL
   POST /api/notify-personal   → n8n → notificación proactiva a un usuario en 1:1
+  GET  /api/requirements      → Consultar requerimientos (Blob metadata)
   GET  /health                → Health check
 """
 
@@ -274,11 +274,88 @@ async def handle_notify_personal(request: web.Request) -> web.Response:
 
 
 # ============================================================
+# GET /api/requirements — Consultar requerimientos
+# ============================================================
+
+async def handle_requirements(request: web.Request) -> web.Response:
+    """
+    Endpoint para consultar requerimientos almacenados en Blob Storage.
+    Lee el metadata.json de cada carpeta REQ-* en el contenedor.
+
+    Query params:
+      ?user_id=AAD_OBJECT_ID   → requerimientos de un usuario
+      ?req_id=REQ-20260225-... → un requerimiento específico
+      (sin params)             → todos los requerimientos
+    """
+    from services.blob_service import blob_service
+
+    user_id = request.query.get("user_id", "").strip()
+    req_id = request.query.get("req_id", "").strip()
+
+    try:
+        if req_id:
+            # Single requirement
+            meta = await blob_service.read_metadata(req_id)
+            if meta:
+                return web.json_response({
+                    "status": "ok",
+                    "count": 1,
+                    "requirements": [meta],
+                })
+            return web.json_response(
+                {"status": "not_found", "count": 0, "requirements": []},
+                status=404,
+            )
+
+        # List all requirements
+        all_req_ids = await blob_service.list_all_requirements()
+        results = []
+        for rid in all_req_ids:
+            meta = await blob_service.read_metadata(rid)
+            if meta:
+                # Filter by user_id if provided
+                if user_id:
+                    sol = meta.get("solicitante", {})
+                    if sol.get("aadObjectId") != user_id:
+                        continue
+                results.append(meta)
+
+        return web.json_response({
+            "status": "ok",
+            "count": len(results),
+            "requirements": results,
+        })
+    except Exception as e:
+        logger.error(f"Error querying requirements: {e}")
+        return web.json_response({"error": str(e)}, status=500)
+
+
+# ============================================================
 # GET /health
 # ============================================================
 
 async def handle_health(request: web.Request) -> web.Response:
     """Health check con estado de ambos bots."""
+    # Check Azure services availability
+    azure_services = {}
+    try:
+        from services.blob_service import blob_service
+        azure_services["blob_storage"] = bool(Config.AZURE_BLOB_CONNECTION_STRING)
+    except Exception:
+        azure_services["blob_storage"] = False
+    try:
+        azure_services["document_intelligence"] = bool(
+            Config.DOC_INTELLIGENCE_ENDPOINT and Config.DOC_INTELLIGENCE_KEY
+        )
+    except Exception:
+        azure_services["document_intelligence"] = False
+    try:
+        azure_services["planner"] = bool(
+            Config.APP_ID and Config.APP_PASSWORD and Config.PLANNER_PLAN_ID
+        )
+    except Exception:
+        azure_services["planner"] = False
+
     return web.json_response({
         "status": "healthy",
         "bot": "DAPPS Bot (unified)",
@@ -289,7 +366,12 @@ async def handle_health(request: web.Request) -> web.Response:
         "personal": {
             "active_users": len(PERSONAL_BOT.personal_references),
             "user_ids": list(PERSONAL_BOT.personal_references.keys()),
+            "pending_attachments": [
+                uid for uid, st in PERSONAL_BOT.user_states.items()
+                if st.get("state") == "esperando_excel"
+            ],
         },
+        "azure_services": azure_services,
         "app_id": Config.APP_ID[:8] + "..." if Config.APP_ID else "NOT SET",
     })
 
@@ -304,6 +386,7 @@ def create_app() -> web.Application:
     app.router.add_post("/api/messages", handle_messages)
     app.router.add_post("/api/notify", handle_notify)
     app.router.add_post("/api/notify-personal", handle_notify_personal)
+    app.router.add_get("/api/requirements", handle_requirements)
     app.router.add_get("/health", handle_health)
     return app
 
@@ -320,6 +403,7 @@ if __name__ == "__main__":
         "  POST /api/messages          ← Azure Bot Service webhook\n"
         "  POST /api/notify            ← n8n → canal\n"
         "  POST /api/notify-personal   ← n8n → usuario 1:1\n"
+        "  GET  /api/requirements      ← Consultar requerimientos\n"
         "  GET  /health                ← Health check"
     )
     app = create_app()

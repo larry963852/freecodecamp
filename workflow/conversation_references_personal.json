@@ -1,0 +1,54 @@
+{
+  "eca0f043-13a3-4d0c-bd2e-6840b1b03bdb": {
+    "additional_properties": {},
+    "activity_id": "1772204526056",
+    "user": {
+      "additional_properties": {},
+      "id": "29:1oJ2gy380WTx5H_hH7VJ-VebxRuZrzMFFUTzUYLiYDjxwOUZv8VWT37ZK-tFUPouCFoRelCxOJXH-R2zH74I1bQ",
+      "name": "Melvin Jhordan Chamorro Alva",
+      "aad_object_id": "eca0f043-13a3-4d0c-bd2e-6840b1b03bdb"
+    },
+    "bot": {
+      "additional_properties": {},
+      "id": "28:e5ac961e-46a9-47df-870a-4b874d4e6188",
+      "name": "dapps-automation-bot"
+    },
+    "conversation": {
+      "additional_properties": {
+        "tenantId": "cddbd103-c38e-4f8c-92db-b28549147502"
+      },
+      "conversation_type": "personal",
+      "id": "a:1hLLmDwc6SSiJSUqHupKyVZYgOOTOIkNhfdkGax0r374EeQ7KcFY--4NyfvRZ3RLHp1HQg4oRgU5Z-OVknTZxa6OuXllk11AmX6yGFwqL9TKjUHJ0odO7tQ5e7Rdhjhdw",
+      "tenant_id": "cddbd103-c38e-4f8c-92db-b28549147502"
+    },
+    "channel_id": "msteams",
+    "locale": "es-ES",
+    "service_url": "https://smba.trafficmanager.net/amer/cddbd103-c38e-4f8c-92db-b28549147502/"
+  },
+  "491b0c75-4b0e-4170-bfac-473de41ef40b": {
+    "additional_properties": {},
+    "activity_id": "1772206322887",
+    "user": {
+      "additional_properties": {},
+      "id": "29:1vFXwqJTgfk0yF20u3A7Wfj1pclyRbJRTT1Ml8bfbnKYUNzeX2oV1NZXjH-NEX8SplG9A39vaf3Qj9KbFkLlMog",
+      "name": "Vanessa  Tandazo C\u00f3rdova",
+      "aad_object_id": "491b0c75-4b0e-4170-bfac-473de41ef40b"
+    },
+    "bot": {
+      "additional_properties": {},
+      "id": "28:e5ac961e-46a9-47df-870a-4b874d4e6188",
+      "name": "dapps-automation-bot"
+    },
+    "conversation": {
+      "additional_properties": {
+        "tenantId": "cddbd103-c38e-4f8c-92db-b28549147502"
+      },
+      "conversation_type": "personal",
+      "id": "a:1UGYW8ugFDBfoqE4HSbfvUSVj2IHXHKzIZE-HwM28Motd0ZUy2I19_UHXbthtC1XYbKNPCr-CoX2WgzmB4flJdnYY5X0K0WTSA6RPsVBgWSlEDZ18VvI2k8zHGf2Y1eU_",
+      "tenant_id": "cddbd103-c38e-4f8c-92db-b28549147502"
+    },
+    "channel_id": "msteams",
+    "locale": "es-ES",
+    "service_url": "https://smba.trafficmanager.net/amer/cddbd103-c38e-4f8c-92db-b28549147502/"
+  }
+}

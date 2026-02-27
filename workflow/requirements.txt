@@ -1,5 +1,37 @@
-# DAPPS Bot - Dependencias
-botbuilder-core>=4.14.0,<5.0
-botbuilder-integration-aiohttp>=4.14.0,<5.0
-aiohttp>=3.8.0,<4.0
+# ============================================
+# DAPPS Bot — Dependencias de producción
+# ============================================
+# Instalar:  pip install -r requirements.txt
+
+# --- Bot Framework SDK ---
+botbuilder-core==4.17.1
+botbuilder-integration-aiohttp==4.17.1
+
+# --- Servidor HTTP ---
+aiohttp>=3.10.0,<4.0
+
+# --- Configuración ---
 python-dotenv>=1.0.0
+
+# --- Azure Blob Storage (archivos Excel / PDF + metadata) ---
+azure-storage-blob>=12.19.0
+
+# --- Azure AI Document Intelligence (análisis de Excel / PDF) ---
+azure-ai-documentintelligence>=1.0.0
+
+# --- Azure Core / Identity ---
+azure-core>=1.30.0
+azure-identity>=1.15.0
+
+# --- Microsoft Graph API (Planner task creation via MSAL) ---
+msal>=1.26.0
+
+# --- Generación de PDF ---
+fpdf2>=2.7.0
+
+# --- Lectura de Excel (fallback parser) ---
+openpyxl>=3.1.0
+
+# --- Producción (opcional pero recomendado) ---
+gunicorn>=21.2.0          # WSGI/ASGI server para deploy
+aiohttp-cors>=0.7.0       # CORS si se expone a otros orígenes

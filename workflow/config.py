@@ -36,12 +36,29 @@ class Config:
         "https://smba.trafficmanager.net/amer/"
     )
 
-        # --- n8n Integration ---
-    # URL del webhook de n8n para procesar mensajes 1:1
+    # --- n8n Integration ---
+    # Webhook para clasificación de mensajes 1:1
     N8N_PERSONAL_WEBHOOK_URL = os.getenv(
         "N8N_PERSONAL_WEBHOOK_URL",
         "https://special-lamp-xqwjww99xqxcp7r4-5678.app.github.dev/webhook/personal-intake"
     )
+    # Webhook para creación de tarea Planner (usa OAuth delegado de n8n)
+    N8N_CREATE_PLANNER_URL = os.getenv(
+        "N8N_CREATE_PLANNER_URL",
+        "https://special-lamp-xqwjww99xqxcp7r4-5678.app.github.dev/webhook/requerimiento-planner"
+    )
+
+    # --- Azure Blob Storage (archivos Excel / PDF + metadata.json) ---
+    AZURE_BLOB_CONNECTION_STRING = os.getenv("AZURE_BLOB_CONNECTION_STRING", "")
+    AZURE_BLOB_CONTAINER = os.getenv("AZURE_BLOB_CONTAINER", "requerimientos")
+
+    # --- Azure AI Document Intelligence (análisis de Excel / PDF) ---
+    DOC_INTELLIGENCE_ENDPOINT = os.getenv("DOC_INTELLIGENCE_ENDPOINT", "")
+    DOC_INTELLIGENCE_KEY = os.getenv("DOC_INTELLIGENCE_KEY", "")
+
+    # --- Microsoft Planner (IDs usados por n8n; el bot no llama Planner directamente) ---
+    PLANNER_PLAN_ID = os.getenv("PLANNER_PLAN_ID", "LY1tOr8SKUqBNay8KAUlmmUAH3Ss")
+    PLANNER_BUCKET_ID = os.getenv("PLANNER_BUCKET_ID", "yD84QLz5yUufFD50vAQvj2UAI0gy")
 
     # --- Servidor ---
     PORT = int(os.getenv("PORT", "3978"))
