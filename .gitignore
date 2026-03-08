@@ -2,4 +2,4 @@
 .venv/
 venv/
 ENV/
-__pycache__/
+__pycache__/workflow/.env
