@@ -29,6 +29,11 @@ msal>=1.26.0
 # --- Generación de PDF ---
 fpdf2>=2.7.0
 
+# --- RAG: Azure OpenAI + SQLite Vector ---
+openai>=1.14.0
+sqlite-vec>=0.1.6
+numpy>=1.24.0
+
 # --- Lectura de Excel (fallback parser) ---
 openpyxl>=3.1.0
 

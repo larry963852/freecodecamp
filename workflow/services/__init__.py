@@ -1,9 +1,11 @@
 """
-Services package — Azure integrations for DAPPS Bot.
+Services — Integraciones externas del DAPPS Bot.
 
-Modules:
-- blob_service: Azure Blob Storage (upload/download Excel, PDF & metadata.json)
-- document_intelligence: Azure AI Document Intelligence (Excel/PDF analysis)
-- pdf_generator: Auto-generate PDF sustento from requirement data
-- planner_service: Microsoft Planner task creation via Graph API
+Módulos:
+- blob_service:            Azure Blob Storage (archivos + metadata)
+- document_intelligence:   Azure AI Document Intelligence (Excel/PDF)
+- n8n_client:              Cliente HTTP unificado para webhooks n8n
+- pdf_generator:           Generación de PDF sustento con fpdf2
+- planner_service:         Microsoft Planner via Graph API
+- rag_service:             RAG con SQLite Vector + Azure OpenAI
 """

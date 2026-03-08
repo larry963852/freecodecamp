@@ -1,0 +1,300 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  status: 'error',\n  error: $json.error?.message || 'Error al crear tarea de consulta'\n}) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        208
+      ],
+      "id": "676032ea-d5c1-4585-8af2-4ed5638b2b8e",
+      "name": "Respond Consulta Error"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  status: 'ok',\n  planner_task_id: $json.id,\n  titulo: $('Preparar Consulta Escalada').item.json.taskTitle\n}) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        16
+      ],
+      "id": "7da750c1-2733-4747-9cad-44962b919acb",
+      "name": "Respond Consulta OK"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.microsoft.com/v1.0/planner/tasks",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  planId:   \"LY1tOr8SKUqBNay8KAUlmmUAH3Ss\",\n  bucketId: \"yD84QLz5yUufFD50vAQvj2UAI0gy\",\n  title:    $('Preparar Consulta Escalada').item.json.taskTitle,\n  assignments: $json.userID ? {\n    [$json.userID]: {\n      \"@odata.type\": \"#microsoft.graph.plannerAssignment\",\n      orderHint: \" !\"\n    }\n  } : {}\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        656,
+        16
+      ],
+      "id": "975fdfdc-8341-40f4-b789-848c29846e8b",
+      "name": "Create Task CONSULTA",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "amDNYM3DRrd2H1JM",
+          "name": "Microsoft account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r2000001-0001-0001-0001-000000000021",
+              "name": "userNAME",
+              "value": "Administrador DAPPS",
+              "type": "string"
+            },
+            {
+              "id": "r2000001-0001-0001-0001-000000000022",
+              "name": "userEMAIL",
+              "value": "admin@dapps.com",
+              "type": "string"
+            },
+            {
+              "id": "r2000001-0001-0001-0001-000000000023",
+              "name": "userID",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        208
+      ],
+      "id": "4216afb5-e9b0-44fd-b704-e5b3ea1cb212",
+      "name": "Fallback Responsable CONSULTA"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "r2000001-0001-0001-0001-000000000010",
+              "leftValue": "={{ $json.userNAME }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        16
+      ],
+      "id": "e14931ea-1282-4338-9070-cb2b166e89bb",
+      "name": "¿Hay Responsable CONSULTA?"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "GZqAb3tBTfarpPj7",
+          "mode": "list",
+          "cachedResultName": "user_cache",
+          "cachedResultUrl": "/projects/bkgisv7cczQwz4m5/datatables/GZqAb3tBTfarpPj7"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "tipo",
+              "keyValue": "CONSULTA"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        16
+      ],
+      "id": "fd517122-8d29-420f-a544-ce4cc064a166",
+      "name": "Get Responsable CONSULTA",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nconst item = raw.body || raw;\n\nconst titulo      = String(item.titulo      || 'Consulta sin título').trim();\nconst descripcion = String(item.descripcion  || '').trim();\nconst solicitante = item.solicitante || {};\nconst mensaje     = String(item.mensaje_original || '').trim();\n\nconst taskTitle = `[CONSULTA] ${titulo} (${solicitante.nombre || 'Desconocido'})`.substring(0, 255);\n\nconst lines = [\n  `📋 Consulta sin respuesta RAG`,\n  `👤 Solicitante: ${solicitante.nombre || 'Desconocido'}`,\n  `📝 ${descripcion}`,\n];\nif (mensaje) { lines.push(''); lines.push(`💬 Mensaje original: ${mensaje}`); }\n\nreturn [{ json: { taskTitle, taskDescription: lines.join('\\n'), solicitante } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        16
+      ],
+      "id": "32af16dc-b9b3-4515-a4e8-f1778ba2a0c7",
+      "name": "Preparar Consulta Escalada"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "consulta-escalada",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        16
+      ],
+      "id": "8bf23caa-63ba-4bcd-b677-91c5c388415b",
+      "name": "Webhook Consulta Escalada",
+      "webhookId": "consulta-escalada-001"
+    }
+  ],
+  "connections": {
+    "Create Task CONSULTA": {
+      "main": [
+        [
+          {
+            "node": "Respond Consulta OK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Consulta Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fallback Responsable CONSULTA": {
+      "main": [
+        [
+          {
+            "node": "Create Task CONSULTA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Hay Responsable CONSULTA?": {
+      "main": [
+        [
+          {
+            "node": "Create Task CONSULTA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fallback Responsable CONSULTA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Responsable CONSULTA": {
+      "main": [
+        [
+          {
+            "node": "¿Hay Responsable CONSULTA?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fallback Responsable CONSULTA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Consulta Escalada": {
+      "main": [
+        [
+          {
+            "node": "Get Responsable CONSULTA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Consulta Escalada": {
+      "main": [
+        [
+          {
+            "node": "Preparar Consulta Escalada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "4ea52147ff2b8b6cedbd49a62f2df2dc6944dde8b57fbebbe4f69a5976fe2a20"
+  }
+}

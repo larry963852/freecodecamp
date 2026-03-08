@@ -1,0 +1,544 @@
+# DAPPS — Manual de Procesos Internos del Área de Tecnología de la Información
+## Base de Conocimiento para el Bot DAPPS
+### Versión 2.0 — Febrero 2026
+
+---
+
+## 1. INFORMACIÓN GENERAL DE LA EMPRESA
+
+### ¿Qué es DAPPS?
+
+DAPPS (Digital Applications & Platform Solutions) es una empresa de tecnología fundada en 2018 con sede principal en Lima, Perú. La empresa se especializa en:
+- Desarrollo de software a medida
+- Consultoría en transformación digital
+- Automatización de procesos empresariales (RPA)
+- Soluciones en la nube (Azure, AWS)
+- Inteligencia Artificial aplicada a negocios
+
+### Estructura del Equipo de TI
+
+| Rol | Responsable | Contacto |
+|-----|------------|---------|
+| Gerente de TI | Carlos Mendoza | carlos.mendoza@dapps.com.pe |
+| Líder de Infraestructura | Ana María Gutiérrez | ana.gutierrez@dapps.com.pe |
+| Administrador de Sistemas | Jorge Ramírez | jorge.ramirez@dapps.com.pe |
+| Soporte Nivel 1 | Equipo Help Desk | helpdesk@dapps.com.pe |
+| Soporte Nivel 2 | Equipo Infraestructura | infra@dapps.com.pe |
+| Soporte Nivel 3 | Equipo Desarrollo | dev@dapps.com.pe |
+| Seguridad de la Información | Patricia Flores | seguridad@dapps.com.pe |
+| DBA (Administrador de BD) | Luis Torres | dba@dapps.com.pe |
+
+### Horarios de Soporte Técnico
+
+- Soporte Nivel 1 (Help Desk):
+  - Lunes a Viernes: 8:00 AM – 6:00 PM (hora Lima, GMT-5)
+  - Sábados: 9:00 AM – 1:00 PM
+  - Domingos y feriados: Sin atención presencial. Solo emergencias vía correo a emergencias-ti@dapps.com.pe
+
+- Soporte Nivel 2 (Infraestructura):
+  - Lunes a Viernes: 9:00 AM – 6:00 PM
+  - Fuera de horario: Solo incidencias críticas (P1)
+
+- Soporte Nivel 3 (Desarrollo):
+  - Lunes a Viernes: 9:00 AM – 6:00 PM
+  - Deployments programados: Martes y Jueves de 10:00 PM – 12:00 AM
+
+### Canales de Comunicación Oficiales
+
+| Canal | Uso |
+|-------|-----|
+| #soporte-ti | Canal principal de Teams para reportar incidencias y consultas generales de TI |
+| #infraestructura | Canal para temas de servidores, redes, VPN y cloud |
+| #desarrollo | Canal para temas de código, deployments y CI/CD |
+| #seguridad | Canal para reportar vulnerabilidades o incidentes de seguridad |
+| Bot DAPPS (1:1) | Chat privado con el bot de TI para requerimientos, incidencias y consultas |
+| helpdesk@dapps.com.pe | Correo electrónico para tickets formales |
+| emergencias-ti@dapps.com.pe | Solo para incidencias críticas fuera de horario |
+
+---
+
+## 2. PROCESO DE SOLICITUD DE ACCESOS (PRO-ACC-001)
+
+Objetivo: Gestionar de manera controlada el acceso a los sistemas, aplicaciones y recursos de TI de DAPPS.
+
+Alcance: Aplica a todos los colaboradores (empleados, contratistas, practicantes) que requieran acceso a cualquier sistema de la empresa.
+
+### Sistemas Disponibles
+
+| Sistema | Descripción | Aprobador | SLA |
+|---------|------------|-----------|-----|
+| Microsoft 365 | Correo, Teams, OneDrive, SharePoint | Jefe Directo | 4 horas |
+| Azure DevOps | Repositorios, pipelines, boards | Líder Técnico | 8 horas |
+| SAP ERP | Módulo financiero y logístico | Gerente de Área + TI | 24 horas |
+| Jira | Gestión de proyectos ágiles | Scrum Master | 4 horas |
+| Confluence | Documentación técnica | Líder de Equipo | 4 horas |
+| VPN Corporativa | Acceso remoto a la red interna | Seguridad TI | 8 horas |
+| AWS Console | Consola de administración cloud | Líder Infraestructura | 24 horas |
+| Azure Portal | Portal de servicios Azure | Líder Infraestructura | 24 horas |
+| GitHub Enterprise | Repositorios de código | Líder Técnico | 4 horas |
+| Power BI | Dashboards y reportes | Data Analytics Lead | 8 horas |
+| SonarQube | Análisis de calidad de código | Líder Técnico | 8 horas |
+
+### Procedimiento de Solicitud de Accesos
+
+1. El colaborador envía un mensaje al Bot DAPPS (chat 1:1 en Teams) indicando qué sistema necesita y el motivo.
+2. El bot clasifica el mensaje como REQUERIMIENTO y solicita detalles adicionales si es necesario.
+3. TI recibe la tarea en Microsoft Planner con los datos del solicitante.
+4. El aprobador (según la tabla anterior) revisa y aprueba/rechaza la solicitud.
+5. TI ejecuta la provisión de acceso y notifica al usuario.
+6. El colaborador confirma que puede acceder correctamente.
+
+### Accesos que Requieren Aprobación Especial
+
+IMPORTANTE: Los siguientes accesos requieren aprobación de Gerencia General además del jefe directo:
+- Acceso administrativo a Azure/AWS (roles Owner, Contributor)
+- SAP — módulo de Finanzas (FI) y Controlling (CO)
+- Acceso a bases de datos de producción
+- Acceso a logs de auditoría
+- Cuentas de servicio con privilegios elevados
+
+---
+
+## 3. PROCESO DE ONBOARDING DE NUEVOS COLABORADORES (PRO-ONB-001)
+
+Objetivo: Asegurar que todo nuevo colaborador reciba su equipo de trabajo y accesos necesarios de manera oportuna desde su primer día.
+
+Responsable: Help Desk (Soporte Nivel 1)
+
+Tiempo total estimado: 2 días hábiles previos al ingreso.
+
+### Checklist de Onboarding
+
+Día -2 (dos días antes del ingreso):
+- RRHH envía formulario de nuevo ingreso a TI vía correo a helpdesk@dapps.com.pe
+- Datos requeridos: nombre completo, cargo, área, jefe directo, fecha de ingreso, tipo de equipo requerido
+
+Día -1 (un día antes):
+- Crear cuenta de Microsoft 365 (correo, Teams)
+- Asignar licencias: Office 365 E3, Teams, Power BI (si aplica)
+- Crear cuenta en Azure DevOps y/o Jira según el área
+- Preparar equipo de cómputo (laptop/desktop)
+- Instalar software base: Windows 11, Office 365, Teams, VPN Client, antivirus corporativo (CrowdStrike Falcon)
+- Configurar acceso a WiFi corporativa (DAPPS-Corp)
+
+Día 0 (día del ingreso):
+- Entrega del equipo con acta de recepción firmada
+- Entrega de credenciales (sobre sellado)
+- Capacitación básica de TI (30 minutos):
+  - Cómo usar el Bot DAPPS para reportar incidencias
+  - Cómo conectarse a la VPN
+  - Políticas de seguridad básicas
+  - Cómo solicitar accesos adicionales
+- Verificar que el colaborador puede acceder a todos los sistemas asignados
+
+Día +3 (tres días después):
+- Seguimiento de TI para confirmar que todo funciona correctamente
+- Resolver cualquier incidencia pendiente
+
+### Equipos Estándar por Rol
+
+| Rol | Equipo | Especificaciones Mínimas |
+|-----|--------|-------------------------|
+| Desarrollador | Laptop Dell Latitude 5540 | i7 13ª gen, 16GB RAM, 512GB SSD, Ubuntu/Windows dual boot |
+| Diseñador UX/UI | MacBook Pro 14" | M3 Pro, 18GB RAM, 512GB SSD |
+| Analista de Datos | Laptop Dell Latitude 5540 | i7, 32GB RAM, 1TB SSD, GPU dedicada opcional |
+| Gerente / PM | Laptop Dell Latitude 5440 | i5 13ª gen, 16GB RAM, 256GB SSD |
+| Administrativo | Desktop Dell OptiPlex 7010 | i5, 8GB RAM, 256GB SSD |
+| Practicante | Laptop Dell Latitude 3440 | i5, 8GB RAM, 256GB SSD |
+
+---
+
+## 4. PROCESO DE SOLICITUD DE EQUIPOS Y REQUERIMIENTOS (PRO-REQ-001)
+
+Objetivo: Gestionar la adquisición y entrega de equipos de cómputo, periféricos y accesorios de TI.
+
+Responsable: Help Desk → Líder de Infraestructura → Compras
+
+### Procedimiento
+
+1. El colaborador envía un mensaje al Bot DAPPS indicando qué equipos necesita y por qué (justificación).
+2. El bot clasifica como REQUERIMIENTO y le pide al usuario que suba un archivo Excel con el detalle de artículos.
+3. El bot procesa el Excel:
+   - Analiza con Azure Document Intelligence (o fallback openpyxl)
+   - Genera un PDF de sustento automático (si el usuario no subió uno)
+   - Sube todo a Azure Blob Storage (contenedor "requerimientos")
+   - Crea una tarea en Microsoft Planner
+4. El jefe directo aprueba el requerimiento en Planner.
+5. Compras cotiza con proveedores (mínimo 3 cotizaciones para montos mayores a S/ 5,000).
+6. Gerencia aprueba la orden de compra (si supera S/ 10,000).
+7. TI recibe, configura y entrega el equipo.
+8. SLA total: 5-10 días hábiles según disponibilidad de stock.
+
+### Formato del Excel de Requerimiento
+
+El archivo Excel debe contener las siguientes columnas:
+- Artículo: Nombre del equipo o periférico solicitado
+- Cantidad: Cantidad de unidades requeridas
+- Comentario: Justificación o especificaciones adicionales
+
+Ejemplo de Excel válido:
+| Artículo | Cantidad | Comentario |
+|----------|----------|-----------|
+| Monitor 24" Full HD | 5 | Pantallas actuales con píxeles muertos |
+| Teclado USB Logitech K120 | 10 | Reemplazo por teclas trabadas |
+| Mouse inalámbrico | 8 | Sensor óptico defectuoso en los actuales |
+| Docking Station USB-C | 3 | Para nuevos colaboradores del área de Dev |
+| Cable HDMI 2m | 5 | Para conexión a proyectores de sala |
+
+### Montos y Aprobaciones
+
+| Monto | Aprobador | Proceso |
+|-------|-----------|---------|
+| Hasta S/ 2,000 | Jefe Directo | Aprobación en Planner |
+| S/ 2,001 – S/ 5,000 | Jefe Directo + Gerente de Área | Doble aprobación |
+| S/ 5,001 – S/ 10,000 | Gerente de Área | 3 cotizaciones requeridas |
+| Más de S/ 10,000 | Gerencia General | Orden de compra formal |
+
+---
+
+## 5. PROCESO DE REPORTE DE INCIDENCIAS (PRO-INC-001)
+
+Objetivo: Restaurar el servicio normal lo más rápido posible, minimizando el impacto en las operaciones del negocio.
+
+Basado en: ITIL v4 — Práctica de Gestión de Incidencias.
+
+### Clasificación de Incidencias
+
+| Prioridad | Tipo | Ejemplo | SLA Respuesta | SLA Resolución |
+|-----------|------|---------|---------------|----------------|
+| P1 | Crítica | Sistema de producción caído, pérdida de datos, brecha de seguridad | 15 min | 4 horas |
+| P2 | Alta | Servicio degradado afectando a múltiples usuarios, VPN caída | 30 min | 8 horas |
+| P3 | Media | Problema individual (PC no enciende, impresora no funciona) | 2 horas | 24 horas |
+| P4 | Baja | Solicitud cosmética, pregunta general, mejora menor | 4 horas | 48 horas |
+
+### Flujo de Escalamiento
+
+Nivel 1 — Help Desk:
+- Primer punto de contacto
+- Resuelve: reseteo de contraseñas, problemas de conectividad básica, instalación de software, problemas de impresora
+- Si no puede resolver en 30 minutos → escala a Nivel 2
+
+Nivel 2 — Infraestructura:
+- Problemas de servidores, redes, VPN, Active Directory
+- Administración de Azure/AWS
+- Si no puede resolver en 2 horas → escala a Nivel 3
+
+Nivel 3 — Desarrollo:
+- Bugs en aplicaciones internas
+- Problemas de integración entre sistemas
+- Optimización de base de datos
+
+### Cómo Reportar una Incidencia
+
+Existen 3 canales para reportar incidencias:
+1. Bot DAPPS (recomendado): Escribir al bot en chat 1:1 de Teams describiendo el problema. El bot clasificará automáticamente como INCIDENCIA y creará una tarea en Planner.
+2. Canal #soporte-ti de Teams: Escribir directamente en el canal. El bot de canal también procesa los mensajes.
+3. Correo electrónico: Enviar a helpdesk@dapps.com.pe con asunto descriptivo.
+
+IMPORTANTE — Incidencias Críticas (P1):
+Para incidencias P1 (sistema de producción caído), además de reportar por los canales normales, llamar al teléfono de emergencias de TI: +51 1 234-5678 ext. 100 (disponible 24/7).
+
+---
+
+## 6. GESTIÓN DE CAMBIOS (PRO-CHG-001)
+
+Objetivo: Asegurar que todos los cambios en el entorno de TI se realicen de manera controlada, minimizando riesgos de interrupción.
+
+### Tipos de Cambios
+
+| Tipo | Descripción | Aprobación | Ventana |
+|------|------------|------------|---------|
+| Estándar | Cambios pre-aprobados de bajo riesgo (ej: actualización de parches menores, agregar usuario a grupo AD) | Automática | Horario laboral |
+| Normal | Cambios planificados que requieren evaluación (ej: migración de servidor, cambio de infraestructura) | CAB (Comité de Cambios) | Martes/Jueves noche |
+| Emergencia | Cambios no planificados para resolver P1 (ej: hotfix en producción) | Gerente de TI | Inmediata |
+
+### Comité de Cambios (CAB)
+
+- Reunión: Todos los lunes a las 10:00 AM en Teams (#cab-ti)
+- Integrantes:
+  - Carlos Mendoza (Gerente de TI) — Presidente
+  - Ana María Gutiérrez (Líder Infraestructura)
+  - Representante de Desarrollo
+  - Patricia Flores (Seguridad)
+- Para solicitar un cambio: Enviar RFC (Request for Change) al canal #cab-ti al menos 3 días hábiles antes del lunes de CAB.
+
+### Ventanas de Mantenimiento Programadas
+
+- Infraestructura: Sábados de 10:00 PM a 2:00 AM (solo si hay cambios aprobados)
+- Aplicaciones: Martes y Jueves de 10:00 PM a 12:00 AM
+- Base de Datos: Domingos de 2:00 AM a 6:00 AM (backups y mantenimiento)
+- Actualizaciones de seguridad: Segundo martes de cada mes (Patch Tuesday) a las 11:00 PM
+
+---
+
+## 7. POLÍTICAS DE SEGURIDAD DE LA INFORMACIÓN (POL-SEG-001)
+
+Objetivo: Proteger los activos de información de DAPPS contra amenazas internas y externas.
+
+Basado en: ISO 27001:2022, NIST CSF 2.0
+
+### Política de Contraseñas
+
+- Longitud mínima: 12 caracteres
+- Complejidad: Debe incluir mayúsculas, minúsculas, números y al menos un carácter especial
+- Vigencia: 90 días (se fuerza cambio automático)
+- Historial: No se pueden reutilizar las últimas 12 contraseñas
+- Bloqueo: Después de 5 intentos fallidos, la cuenta se bloquea por 30 minutos
+- MFA: Obligatorio para todos los usuarios de Microsoft 365 (Microsoft Authenticator o SMS)
+- Reseteo: El usuario puede hacerlo por autoservicio en https://aka.ms/sspr o solicitar al Help Desk
+
+### Política de Uso de Internet y Correo
+
+- El correo corporativo es solo para uso laboral
+- Prohibido enviar información confidencial a correos personales
+- No abrir archivos adjuntos sospechosos (reportar a seguridad@dapps.com.pe)
+- Acceso a redes sociales permitido durante horario de almuerzo
+- Descargas de software solo desde fuentes autorizadas (Software Center o TI instala)
+- VPN obligatoria para acceso remoto a recursos internos
+
+### Clasificación de Información
+
+| Nivel | Ejemplos | Manejo |
+|-------|---------|--------|
+| Pública | Material de marketing, ofertas laborales | Sin restricciones |
+| Interna | Manuales de procesos, presentaciones internas | Solo acceso a empleados de DAPPS |
+| Confidencial | Contratos con clientes, datos financieros | Acceso con necesidad de saber, cifrado en tránsito |
+| Altamente Confidencial | Credenciales, datos personales (LPDP), código fuente crítico | Cifrado en reposo y tránsito, acceso con aprobación explícita |
+
+### Reporte de Incidentes de Seguridad
+
+Si detectas algo sospechoso:
+1. No hagas clic en enlaces sospechosos ni abras archivos desconocidos
+2. Reporta inmediatamente a seguridad@dapps.com.pe o al canal #seguridad de Teams
+3. Desconecta tu equipo de la red si sospechas que fue comprometido
+4. Preserva evidencia (capturas de pantalla del correo/mensaje sospechoso)
+
+---
+
+## 8. VPN Y ACCESO REMOTO (PRO-VPN-001)
+
+Objetivo: Permitir el acceso seguro a los recursos internos de DAPPS desde ubicaciones remotas.
+
+### Configuración de VPN
+
+1. Software: GlobalProtect (Palo Alto Networks)
+2. Descarga: Desde https://vpn.dapps.com.pe
+3. Portal: vpn.dapps.com.pe
+4. Credenciales: Mismo usuario y contraseña de Microsoft 365
+5. MFA: Se solicitará código de Microsoft Authenticator al conectar
+
+### Problemas Comunes de VPN
+
+| Problema | Solución |
+|----------|---------|
+| "Error de autenticación" | Verificar usuario/contraseña en https://portal.office.com. Si funciona ahí pero no en VPN, contactar Help Desk. |
+| "No se puede conectar al portal" | Verificar conexión a internet. Si hay internet pero no conecta, puede haber un bloqueo del ISP. Probar con datos móviles. |
+| "Conexión lenta" | La VPN agrega latencia. Para videollamadas de Teams, desconectar VPN (Teams funciona sin VPN). |
+| "Se desconecta frecuentemente" | Verificar estabilidad de WiFi. Probar con cable Ethernet. Si persiste, reportar a Help Desk. |
+| "GlobalProtect no aparece" | Reinstalar desde https://vpn.dapps.com.pe. Si no funciona, solicitar instalación a Help Desk. |
+
+---
+
+## 9. BACKUP Y RESTAURACIÓN (PRO-BKP-001)
+
+Objetivo: Garantizar la disponibilidad y recuperación de información crítica ante cualquier evento de pérdida de datos.
+
+### Estrategia de Backup
+
+| Recurso | Frecuencia | Retención | Ubicación |
+|---------|-----------|-----------|-----------|
+| OneDrive / SharePoint | Continuo (versionado) | 93 días de versiones | Microsoft 365 (nativo) |
+| Bases de datos Azure SQL | Cada 12 horas | 35 días | Azure Backup Vault |
+| Servidores virtuales (VMs) | Diario a las 2:00 AM | 30 días | Azure Recovery Services |
+| Código fuente (GitHub/DevOps) | Continuo (Git) | Ilimitado | GitHub Enterprise / Azure DevOps |
+| Configuraciones de red | Semanal (domingos) | 90 días | Blob Storage cifrado |
+| Correo Exchange Online | Continuo | 14 días papelera, 30 días recuperable | Microsoft 365 |
+
+### Solicitar Restauración de Archivos
+
+1. Archivos de OneDrive: El usuario puede restaurar versiones anteriores directamente desde OneDrive → clic derecho → Historial de versiones.
+2. Archivos de SharePoint: Igual que OneDrive. Si se eliminó permanentemente, contactar Help Desk.
+3. Correos eliminados: Revisar la carpeta "Elementos recuperables" en Outlook. Si ya pasaron los 14 días, solicitar a Help Desk (hasta 30 días).
+4. Bases de datos: Crear un requerimiento formal vía Bot DAPPS. El DBA (Luis Torres) restaurará en ambiente de staging primero.
+5. VMs: Solicitar vía requerimiento. Tiempo estimado de restauración: 2–4 horas.
+
+---
+
+## 10. GESTIÓN DE SOFTWARE Y LICENCIAS (PRO-SFT-001)
+
+Objetivo: Asegurar que todo software utilizado en DAPPS esté debidamente licenciado y aprobado.
+
+### Software Aprobado (Catálogo)
+
+| Software | Licencia | Quién lo solicita | Instalación |
+|----------|---------|-------------------|-------------|
+| Microsoft Office 365 | Enterprise E3 | Todos | Pre-instalado |
+| Visual Studio Code | Gratis | Desarrolladores | Software Center |
+| Visual Studio 2022 | Enterprise | Desarrolladores .NET | Help Desk instala |
+| Docker Desktop | Business | DevOps / Developers | Help Desk instala |
+| Postman | Free / Pro | Developers / QA | Software Center |
+| Figma | Professional | Diseñadores UX/UI | Web (cuenta corporativa) |
+| Adobe Creative Cloud | Enterprise | Diseñadores / Marketing | Help Desk instala |
+| Slack | Free (uso limitado) | Comunicación con clientes | Web |
+| Zoom | Business | Reuniones con clientes | Instalador auto-descargable |
+| Python | Gratis | Developers / Data | Software Center |
+| Node.js | Gratis | Developers | Software Center |
+| Git | Gratis | Todos los técnicos | Pre-instalado |
+
+### Solicitar Nuevo Software
+
+1. Enviar requerimiento al Bot DAPPS indicando: nombre del software, versión, justificación de uso.
+2. TI evalúa: compatibilidad, seguridad, licenciamiento.
+3. Seguridad revisa: Si el software cumple con políticas de seguridad.
+4. SLA de evaluación: 3–5 días hábiles.
+5. Si se aprueba, TI agrega al catálogo y procede con la instalación.
+
+PROHIBIDO:
+- Software pirata o crackeado
+- Herramientas de hacking/pentesting sin autorización de Seguridad
+- Software P2P (torrents)
+- Software de acceso remoto no autorizado (TeamViewer personal, AnyDesk sin licencia corporativa)
+Violaciones a esta política pueden resultar en sanciones disciplinarias.
+
+---
+
+## 11. GESTIÓN DE IMPRESORAS Y PERIFÉRICOS (PRO-PER-001)
+
+Objetivo: Administrar el uso y mantenimiento de impresoras, escáneres y periféricos compartidos.
+
+### Impresoras Disponibles
+
+| Impresora | Ubicación | Tipo | IP/Nombre |
+|-----------|----------|------|-----------|
+| HP LaserJet Pro M404 | Piso 3 - Desarrollo | B/N | PRT-DEV-03 |
+| HP Color LaserJet M454 | Piso 3 - Sala de reuniones | Color | PRT-SALA-03 |
+| HP LaserJet Pro M404 | Piso 2 - Administración | B/N | PRT-ADM-02 |
+| Epson EcoTank L3250 | Piso 2 - RRHH | Color / Scanner | PRT-RRHH-02 |
+| HP DesignJet T250 | Piso 1 - Marketing | Plotter | PRT-MKT-01 |
+
+### Cómo Agregar una Impresora
+
+1. Ir a Configuración → Impresoras y escáneres → Agregar impresora
+2. Buscar por nombre (ej: PRT-DEV-03)
+3. Si no aparece, usar la opción "La impresora deseada no está en la lista" y escribir: \\printserver.dapps.local\PRT-DEV-03
+4. Si persiste el problema, contactar al Help Desk
+
+---
+
+## 12. PROCESO DE OFFBOARDING — DESVINCULACIÓN (PRO-OFF-001)
+
+Objetivo: Revocar todos los accesos y recuperar los equipos de un colaborador que se desvincula de la empresa.
+
+Responsable: Help Desk + Seguridad TI
+
+SLA: Todos los accesos deben revocarse el mismo día de la desvinculación (o antes si la salida es planificada).
+
+### Checklist de Offboarding
+
+1. RRHH notifica a TI vía correo a helpdesk@dapps.com.pe con fecha de salida y último día laboral.
+
+2. Seguridad TI ejecuta:
+   - Revocar acceso a Microsoft 365 (deshabilitar cuenta AD)
+   - Revocar VPN
+   - Revocar acceso a Azure/AWS (si aplica)
+   - Revocar acceso a sistemas terceros (Jira, GitHub, etc.)
+   - Redirigir correo al jefe directo por 30 días
+
+3. Help Desk ejecuta:
+   - Recuperar laptop/desktop con acta de devolución
+   - Recuperar periféricos (mouse, teclado, audífonos, docking station)
+   - Verificar estado del equipo
+   - Realizar wipe (borrado seguro) del equipo
+   - Reasignar licencias de software
+
+4. Backup: Se conserva una copia del buzón de correo y OneDrive del ex-colaborador por 90 días, accesible solo por solicitud del jefe directo a TI.
+
+---
+
+## 13. PREGUNTAS FRECUENTES (FAQ)
+
+### Accesos y Cuentas
+
+P: ¿Cómo cambio mi contraseña?
+R: Ir a https://aka.ms/sspr o presionar Ctrl+Alt+Del → Cambiar contraseña.
+
+P: ¿Olvidé mi contraseña, qué hago?
+R: Usar reseteo por autoservicio en https://aka.ms/sspr (requiere MFA). Si no puedes, contactar Help Desk.
+
+P: ¿Cómo activo MFA?
+R: Al iniciar sesión por primera vez, Microsoft pide configurar MFA. Descargar Microsoft Authenticator y escanear el QR.
+
+P: Mi cuenta está bloqueada
+R: Esperar 30 minutos (desbloqueo automático) o contactar Help Desk para desbloqueo inmediato.
+
+P: ¿Cómo solicito acceso a un nuevo sistema?
+R: Escribir al Bot DAPPS en chat 1:1 indicando el sistema y la justificación.
+
+### Equipos y Software
+
+P: Mi PC no enciende
+R: Verificar que el cable de alimentación esté conectado. Probar con otro enchufe. Si no funciona, reportar incidencia al Bot DAPPS.
+
+P: Mi laptop está muy lenta
+R: Reiniciar el equipo. Si persiste, verificar uso de disco/RAM (Task Manager). Reportar al Help Desk si el problema continúa.
+
+P: ¿Puedo instalar software por mi cuenta?
+R: No. Todo software debe ser instalado por TI o estar en el Software Center. Solicitar vía Bot DAPPS.
+
+P: ¿Cómo conecto un segundo monitor?
+R: Conectar vía HDMI o USB-C. Si necesitas un adaptador o docking station, solicitarlo como requerimiento.
+
+P: La impresora no imprime
+R: Verificar que estés conectado a la red corporativa (WiFi DAPPS-Corp o cable). Verificar que la impresora correcta esté seleccionada. Reiniciar el servicio de cola de impresión. Si no se resuelve, reportar al Help Desk.
+
+### VPN y Conectividad
+
+P: ¿Necesito VPN para usar Teams?
+R: No. Microsoft Teams funciona sin VPN. Solo necesitas VPN para acceder a recursos internos (servidores, SharePoint on-premise, impresoras).
+
+P: ¿Puedo usar VPN desde mi celular?
+R: Sí. Descargar GlobalProtect desde App Store / Google Play y configurar con el portal vpn.dapps.com.pe.
+
+P: ¿La VPN funciona en Linux?
+R: Sí. Descargar el cliente de GlobalProtect para Linux desde https://vpn.dapps.com.pe.
+
+P: ¿WiFi DAPPS-Guest tiene acceso a la red interna?
+R: No. La red de invitados solo tiene acceso a internet. Para recursos internos, usar DAPPS-Corp con credenciales corporativas.
+
+---
+
+## 14. DIRECTORIO DE SERVICIOS DE TI
+
+| Servicio | Contacto | Horario |
+|----------|---------|---------|
+| Help Desk (Nivel 1) | helpdesk@dapps.com.pe / Bot DAPPS | L-V 8AM-6PM, S 9AM-1PM |
+| Infraestructura (Nivel 2) | infra@dapps.com.pe | L-V 9AM-6PM |
+| Desarrollo (Nivel 3) | dev@dapps.com.pe | L-V 9AM-6PM |
+| Seguridad TI | seguridad@dapps.com.pe | L-V 9AM-6PM |
+| DBA | dba@dapps.com.pe (Luis Torres) | L-V 9AM-6PM |
+| Emergencias TI (24/7) | emergencias-ti@dapps.com.pe / Tel: +51 1 234-5678 ext. 100 | 24/7 (solo P1) |
+| Gerente de TI | carlos.mendoza@dapps.com.pe | L-V 9AM-6PM |
+
+---
+
+## 15. GLOSARIO DE TÉRMINOS
+
+| Término | Definición |
+|---------|-----------|
+| SLA | Service Level Agreement (Acuerdo de Nivel de Servicio). Tiempo máximo para responder/resolver una solicitud. |
+| CAB | Change Advisory Board (Comité Asesor de Cambios). Grupo que aprueba cambios en infraestructura. |
+| RFC | Request for Change (Solicitud de Cambio). Documento formal para proponer un cambio. |
+| MFA | Multi-Factor Authentication. Segundo factor de autenticación además de la contraseña. |
+| P1/P2/P3/P4 | Niveles de prioridad de incidencias, donde P1 es la más crítica. |
+| RAG | Retrieval-Augmented Generation. Técnica de IA que combina búsqueda en documentos con generación de texto. |
+| VPN | Virtual Private Network. Red privada virtual para acceso remoto seguro. |
+| AD | Active Directory. Servicio de directorio de Microsoft para gestión de usuarios y equipos. |
+| Blob Storage | Servicio de almacenamiento de objetos de Azure para guardar archivos en la nube. |
+| Planner | Herramienta de gestión de tareas de Microsoft 365. |
+| Bot DAPPS | Bot de Microsoft Teams de TI que clasifica y gestiona solicitudes automáticamente. |
+
+---
+
+Documento interno de DAPPS — No distribuir fuera de la organización.
+Última actualización: Febrero 2026 | Versión 2.0
+Aprobado por: Carlos Mendoza, Gerente de TI

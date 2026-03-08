@@ -24,8 +24,8 @@ from botbuilder.core import (
 from botbuilder.schema import Activity, ActivityTypes, ConversationReference
 
 from config import Config
-from channel.bot import DappsChannelBot, build_channel_conversation_reference
-from personal.bot import DappsPersonalBot
+from bots.channel_bot import DappsChannelBot, build_channel_conversation_reference
+from bots.personal_bot import DappsPersonalBot
 
 logging.basicConfig(
     level=logging.INFO,
@@ -356,6 +356,16 @@ async def handle_health(request: web.Request) -> web.Response:
     except Exception:
         azure_services["planner"] = False
 
+    # RAG status
+    rag_status = {}
+    try:
+        from services.rag_service import rag_service
+        rag_status["available"] = rag_service.is_available
+        rag_status["initialized"] = rag_service._initialized
+    except Exception:
+        rag_status["available"] = False
+        rag_status["initialized"] = False
+
     return web.json_response({
         "status": "healthy",
         "bot": "DAPPS Bot (unified)",
@@ -372,6 +382,7 @@ async def handle_health(request: web.Request) -> web.Response:
             ],
         },
         "azure_services": azure_services,
+        "rag": rag_status,
         "app_id": Config.APP_ID[:8] + "..." if Config.APP_ID else "NOT SET",
     })
 
@@ -388,6 +399,22 @@ def create_app() -> web.Application:
     app.router.add_post("/api/notify-personal", handle_notify_personal)
     app.router.add_get("/api/requirements", handle_requirements)
     app.router.add_get("/health", handle_health)
+
+    # Inicializar RAG al arrancar (async)
+    async def init_rag(app):
+        try:
+            from services.rag_service import rag_service
+            await rag_service.initialize()
+            if rag_service.is_available:
+                logger.info("[RAG] Servicio RAG listo.")
+            else:
+                logger.warning(
+                    "[RAG] RAG no disponible — consultas se escalarán a Planner."
+                )
+        except Exception as e:
+            logger.warning(f"[RAG] No se pudo inicializar RAG: {e}")
+
+    app.on_startup.append(init_rag)
     return app
 
 

@@ -47,6 +47,11 @@ class Config:
         "N8N_CREATE_PLANNER_URL",
         "https://special-lamp-xqwjww99xqxcp7r4-5678.app.github.dev/webhook/requerimiento-planner"
     )
+    # Webhook para escalar consultas sin respuesta RAG → crear tarea Planner
+    N8N_CONSULTA_ESCALADA_URL = os.getenv(
+        "N8N_CONSULTA_ESCALADA_URL",
+        "https://special-lamp-xqwjww99xqxcp7r4-5678.app.github.dev/webhook/consulta-escalada"
+    )
 
     # --- Azure Blob Storage (archivos Excel / PDF + metadata.json) ---
     AZURE_BLOB_CONNECTION_STRING = os.getenv("AZURE_BLOB_CONNECTION_STRING", "")
@@ -55,6 +60,16 @@ class Config:
     # --- Azure AI Document Intelligence (análisis de Excel / PDF) ---
     DOC_INTELLIGENCE_ENDPOINT = os.getenv("DOC_INTELLIGENCE_ENDPOINT", "")
     DOC_INTELLIGENCE_KEY = os.getenv("DOC_INTELLIGENCE_KEY", "")
+
+    # --- Azure OpenAI (RAG — embeddings + chat) ---
+    AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT", "")
+    AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY", "")
+    AZURE_OPENAI_EMBEDDING_DEPLOYMENT = os.getenv(
+        "AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "text-embedding-ada-002"
+    )
+    AZURE_OPENAI_CHAT_DEPLOYMENT = os.getenv(
+        "AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-4.1-mini"
+    )
 
     # --- Microsoft Planner (IDs usados por n8n; el bot no llama Planner directamente) ---
     PLANNER_PLAN_ID = os.getenv("PLANNER_PLAN_ID", "LY1tOr8SKUqBNay8KAUlmmUAH3Ss")

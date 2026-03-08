@@ -1,0 +1,388 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "requerimiento-planner",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        256,
+        704
+      ],
+      "id": "b2eeeca7-4bf9-4c9c-bdf4-94146b67273f",
+      "name": "Webhook Requerimiento Planner",
+      "webhookId": "requerimiento-planner-001"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nconst item = raw.body || raw;\n\nconst req_id      = String(item.req_id      || '').trim();\nconst titulo      = String(item.titulo      || 'Sin título').trim();\nconst descripcion = String(item.descripcion || '').trim();\nconst solicitante = item.solicitante || {};\nconst articulos   = Array.isArray(item.articulos) ? item.articulos : [];\nconst blob_urls   = item.blob_urls || {};\n\nif (!req_id) throw new Error('Campo req_id es obligatorio y está vacío.');\n\nconst taskTitle = `[1:1] REQUERIMIENTO - ${titulo} (${solicitante.nombre || 'Desconocido'})`.substring(0, 255);\n\nconst lines = [\n  `📋 Requerimiento: ${req_id}`,\n  `👤 Solicitante:   ${solicitante.nombre || 'Desconocido'}`,\n  `📝 Descripción:  ${descripcion}`,\n];\n\nif (articulos.length > 0) {\n  lines.push('');\n  lines.push(`📊 Artículos solicitados (${articulos.length}):`);\n  articulos.slice(0, 20).forEach((art, i) => {\n    lines.push(`  ${i + 1}. ${art.articulo || '?'}  x${art.cantidad || 1}  ${art.comentario ? '— ' + art.comentario : ''}`);\n  });\n  if (articulos.length > 20) lines.push(`  ... y ${articulos.length - 20} artículos más`);\n}\n\nif (blob_urls.excel_url) { lines.push(''); lines.push(`📎 Excel:        ${blob_urls.excel_url}`); }\nif (blob_urls.pdf_url)   { lines.push(`📎 PDF Sustento: ${blob_urls.pdf_url}`); }\n\nreturn [{ json: { req_id, taskTitle, taskDescription: lines.join('\\n'), solicitante, articulosCount: articulos.length } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        704
+      ],
+      "id": "2de65576-52db-4b3b-93fc-ad4c01790f37",
+      "name": "Preparar Tarea Planner"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "GZqAb3tBTfarpPj7",
+          "mode": "list",
+          "cachedResultName": "user_cache",
+          "cachedResultUrl": "/projects/bkgisv7cczQwz4m5/datatables/GZqAb3tBTfarpPj7"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "tipo",
+              "keyValue": "REQUERIMIENTO"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        736,
+        704
+      ],
+      "id": "c596fa11-217b-496e-8edb-0dff14edcf81",
+      "name": "Get Responsable REQ",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "r1000001-0001-0001-0001-000000000010",
+              "leftValue": "={{ $json.userNAME }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        704
+      ],
+      "id": "92c4a2fd-b218-418d-97b0-fa5764dfd35e",
+      "name": "¿Hay Responsable REQ?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1000001-0001-0001-0001-000000000021",
+              "name": "userNAME",
+              "value": "Administrador DAPPS",
+              "type": "string"
+            },
+            {
+              "id": "r1000001-0001-0001-0001-000000000022",
+              "name": "userEMAIL",
+              "value": "admin@dapps.com",
+              "type": "string"
+            },
+            {
+              "id": "r1000001-0001-0001-0001-000000000023",
+              "name": "userID",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        1056
+      ],
+      "id": "30ee8c18-c6a5-4ea1-b7b6-4b58a5d60df5",
+      "name": "Fallback Responsable REQ"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.microsoft.com/v1.0/planner/tasks",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  planId:   \"LY1tOr8SKUqBNay8KAUlmmUAH3Ss\",\n  bucketId: \"yD84QLz5yUufFD50vAQvj2UAI0gy\",\n  title:    $('Preparar Tarea Planner').item.json.taskTitle,\n  assignments: $json.userID ? {\n    [$json.userID]: {\n      \"@odata.type\": \"#microsoft.graph.plannerAssignment\",\n      orderHint: \" !\"\n    }\n  } : {}\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1312,
+        352
+      ],
+      "id": "464d52ee-b224-4e1f-a61d-19b3860a26f9",
+      "name": "Create Task REQ",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "amDNYM3DRrd2H1JM",
+          "name": "Microsoft account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/planner/tasks/{{ $json.id }}/details",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1712,
+        384
+      ],
+      "id": "20adf363-c6b2-4410-929c-e9cc9926f989",
+      "name": "Get Task Details REQ",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "amDNYM3DRrd2H1JM",
+          "name": "Microsoft account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://graph.microsoft.com/v1.0/planner/tasks/{{ $('Create Task REQ').item.json.id }}/details",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "If-Match",
+              "value": "={{ $json['@odata.etag'] }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  description: $('Preparar Tarea Planner').item.json.taskDescription\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1696,
+        704
+      ],
+      "id": "17575466-90b1-456e-acf2-50099c663f3b",
+      "name": "Update Task Details REQ",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "amDNYM3DRrd2H1JM",
+          "name": "Microsoft account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  status: 'ok',\n  planner_task_id: $('Create Task REQ').item.json.id,\n  req_id: $('Preparar Tarea Planner').item.json.req_id\n}) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1936,
+        704
+      ],
+      "id": "38999b39-24a4-4e62-a8b5-7e00b95d5019",
+      "name": "Respond Planner OK"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  status: 'error',\n  error: $json.error?.message || 'Error al crear tarea Planner'\n}) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1696,
+        912
+      ],
+      "id": "920fb47c-265f-497f-b942-e24e36e80bad",
+      "name": "Respond Planner Error"
+    }
+  ],
+  "connections": {
+    "Webhook Requerimiento Planner": {
+      "main": [
+        [
+          {
+            "node": "Preparar Tarea Planner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Tarea Planner": {
+      "main": [
+        [
+          {
+            "node": "Get Responsable REQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Responsable REQ": {
+      "main": [
+        [
+          {
+            "node": "¿Hay Responsable REQ?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fallback Responsable REQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Hay Responsable REQ?": {
+      "main": [
+        [
+          {
+            "node": "Create Task REQ",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fallback Responsable REQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fallback Responsable REQ": {
+      "main": [
+        [
+          {
+            "node": "Create Task REQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Task REQ": {
+      "main": [
+        [
+          {
+            "node": "Get Task Details REQ",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Planner Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Task Details REQ": {
+      "main": [
+        [
+          {
+            "node": "Update Task Details REQ",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Planner Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Task Details REQ": {
+      "main": [
+        [
+          {
+            "node": "Respond Planner OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "4ea52147ff2b8b6cedbd49a62f2df2dc6944dde8b57fbebbe4f69a5976fe2a20"
+  }
+}

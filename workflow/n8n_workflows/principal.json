@@ -1,0 +1,799 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Log de REQUERIMIENTO — clasificación exitosa, flujo de 2 pasos activado en el bot\n// La tarea Planner se creará desde el bot una vez recibido el Excel del solicitante\nconst staticData = $getWorkflowStaticData('global');\nif (!Array.isArray(staticData.requerimientosLog)) staticData.requerimientosLog = [];\n\nconst item = $input.first().json;\n\nstaticData.requerimientosLog.push({\n  timestamp:   new Date().toISOString(),\n  origen:      'personal',\n  tipo:        'REQUERIMIENTO',\n  titulo:      item.output?.titulo      || 'N/A',\n  descripcion: item.output?.descripcion || 'N/A',\n  solicitante: item.output?.solicitante || 'N/A',\n  mensajeOriginal: item.mensaje || 'N/A',\n  nota: 'Clasificación completada — Planner se creará en el bot tras recibir Excel del solicitante'\n});\n\nstaticData.requerimientosLog = staticData.requerimientosLog.slice(-500);\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        1888
+      ],
+      "id": "74b51a50-a5d4-4bf9-8c63-3699ac1dc57f",
+      "name": "Log Requerimiento"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log de CONSULTA (no crea tarea, solo registra)\nconst staticData = $getWorkflowStaticData('global');\nif (!Array.isArray(staticData.consultasLog)) staticData.consultasLog = [];\n\nconst item = $input.first().json;\n\nstaticData.consultasLog.push({\n  timestamp:   new Date().toISOString(),\n  origen:      'personal',\n  titulo:      item.output?.titulo      || 'N/A',\n  descripcion: item.output?.descripcion || 'N/A',\n  solicitante: item.output?.solicitante || 'N/A',\n  mensajeOriginal: item.mensaje || 'N/A'\n});\n\nstaticData.consultasLog = staticData.consultasLog.slice(-500);\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        2048
+      ],
+      "id": "0c3c8f31-d644-421a-a06c-9719b3b01446",
+      "name": "Log Consulta"
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nif (!Array.isArray(staticData.erroresLog)) staticData.erroresLog = [];\n\nconst item = $input.first().json;\nlet mensajeOriginal = 'N/A';\nlet solicitante = 'N/A';\ntry {\n  mensajeOriginal = $('Validar Contrato').item?.json?.mensaje || 'N/A';\n  solicitante     = $('Validar Contrato').item?.json?.solicitante?.nombre || 'N/A';\n} catch(e) {}\n\nstaticData.erroresLog.push({\n  timestamp:       new Date().toISOString(),\n  origen:          'personal',\n  error:           item.error?.message || JSON.stringify(item.error) || 'Error desconocido',\n  nodo:            item.error?.node?.name || 'N/A',\n  mensajeOriginal,\n  solicitante\n});\n\nstaticData.erroresLog = staticData.erroresLog.slice(-500);\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        2288
+      ],
+      "id": "1460ea15-7006-4826-8de4-8756eb90487a",
+      "name": "Log Error"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://special-lamp-xqwjww99xqxcp7r4-3978.app.github.dev/api/notify-personal",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  user_id: $('Validar Contrato').item.json.solicitante.aadObjectId,\n  message: \"⚠️ No fue posible procesar tu solicitud en este momento.\\n\\n\" +\n    \"Referencia técnica: \" + ($json.error?.message || 'Error desconocido') + \"\\n\\n\" +\n    \"Por favor, inténtalo nuevamente en unos minutos. Si el problema persiste, contacta al equipo de TI.\"\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2144,
+        2608
+      ],
+      "id": "5fee2b33-d7db-4849-8a6e-e42a65d75bdd",
+      "name": "Notificar Error al Usuario",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  tipo: $('Validar Output IA').item.json.output.tipo,\n  titulo: $('Validar Output IA').item.json.output.titulo,\n  descripcion: $('Validar Output IA').item.json.output.descripcion,\n  crear_tarea: false,\n  solicitante: $('Validar Output IA').item.json.output.solicitante\n}) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1264,
+        2288
+      ],
+      "id": "7156c1b9-9d38-4438-8cbd-282fb9a62bea",
+      "name": "Respond CONSULTA"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  tipo: 'IGNORAR',\n  titulo: '',\n  descripcion: 'Mensaje no accionable',\n  crear_tarea: false,\n  solicitante: $json.solicitante?.nombre || 'Desconocido'\n}) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        2000
+      ],
+      "id": "55e14fb2-a1db-4886-bb4c-2d30774ab3eb",
+      "name": "Respond IGNORAR"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  tipo: $('Validar Output IA').item.json.output.tipo,\n  titulo: $('Validar Output IA').item.json.output.titulo,\n  descripcion: $('Validar Output IA').item.json.output.descripcion,\n  crear_tarea: $('Validar Output IA').item.json.output.crear_tarea,\n  solicitante: $('Validar Output IA').item.json.output.solicitante\n}) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        1424
+      ],
+      "id": "8a82efac-f820-4047-9887-0f3dfc277dcc",
+      "name": "Respond INCIDENCIA"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  tipo: $('Validar Output IA').item.json.output.tipo,\n  titulo: $('Validar Output IA').item.json.output.titulo,\n  descripcion: $('Validar Output IA').item.json.output.descripcion,\n  crear_tarea: $('Validar Output IA').item.json.output.crear_tarea,\n  solicitante: $('Validar Output IA').item.json.output.solicitante\n}) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1104,
+        1728
+      ],
+      "id": "d482d312-c01a-4cc4-8e1a-4a873fc83db0",
+      "name": "Respond REQUERIMIENTO"
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nif (!Array.isArray(staticData.tareasLog)) staticData.tareasLog = [];\n\nconst item = $input.first().json;\nlet responsable = 'N/A';\ntry { responsable = $('¿Hay Responsable?').item.json.userNAME || $('Fallback Responsable').item.json.userNAME || 'N/A'; } catch(e) {}\nlet tareaId = 'N/A';\ntry { tareaId = $('Create Planner Task').item.json.id || 'N/A'; } catch(e) {}\n\nstaticData.tareasLog.push({\n  timestamp:   new Date().toISOString(),\n  origen:      'personal',\n  tipo:        item.output?.tipo        || 'N/A',\n  titulo:      item.output?.titulo      || 'N/A',\n  solicitante: item.output?.solicitante  || 'N/A',\n  descripcion: item.output?.descripcion  || 'N/A',\n  bucket:      item.meta?.bucket         || 'N/A',\n  responsable,\n  tareaId,\n  estado: 'CREADA'\n});\n\nstaticData.tareasLog = staticData.tareasLog.slice(-1000);\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        2112
+      ],
+      "id": "56d16071-7612-4e37-93aa-bee82595a877",
+      "name": "Log Tarea Creada"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.microsoft.com/v1.0/me/sendMail",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  message: {\n    subject: \"[1:1][\" + $('Switch por Tipo').item.json.output.tipo + \"] \" + $('Switch por Tipo').item.json.output.titulo,\n    importance: $('Switch por Tipo').item.json.output.tipo === 'INCIDENCIA' ? 'high' : 'normal',\n    body: {\n      contentType: \"HTML\",\n      content:\n        \"<p>Hola,</p>\" +\n        \"<p>Se creó una actividad en Planner desde un chat <strong>1:1</strong> con DAPPS Bot.</p>\" +\n        \"<p><strong>Tipo:</strong> \" + $('Switch por Tipo').item.json.output.tipo + \"</p>\" +\n        \"<p><strong>Título:</strong> \" + $('Switch por Tipo').item.json.output.titulo + \"</p>\" +\n        \"<p><strong>Solicitante:</strong> \" + $('Switch por Tipo').item.json.output.solicitante + \"</p>\" +\n        \"<p><strong>Descripción:</strong> \" + $('Switch por Tipo').item.json.output.descripcion + \"</p>\" +\n        \"<p><strong>Responsable:</strong> \" + ($('¿Hay Responsable?').item.json.userNAME || 'Por asignar') + \"</p>\" +\n        \"<p><strong>ID de tarea:</strong> \" + $('Create Planner Task').item.json.id + \"</p>\" +\n        \"<p><strong>Origen:</strong> Chat privado (1:1)</p>\" +\n        \"<p>Notificación automática generada por n8n.</p>\"\n    },\n    toRecipients: [\n      {\n        emailAddress: {\n          address: $('¿Hay Responsable?').item.json.userEMAIL || $('Fallback Responsable').item.json.userEMAIL || 'admin@dapps.com'\n        }\n      }\n    ]\n  },\n  saveToSentItems: true\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2160,
+        1856
+      ],
+      "id": "ecd40f19-0310-40ff-84bf-fb66e29519da",
+      "name": "Send email notification",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "amDNYM3DRrd2H1JM",
+          "name": "Microsoft account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://special-lamp-xqwjww99xqxcp7r4-3978.app.github.dev/api/notify-personal",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  user_id: $('Validar Contrato').item.json.solicitante.aadObjectId,\n  message: \"✅ **Tarea registrada en Planner**\\n\\n\" +\n    $('Switch por Tipo').item.json.meta.etiqueta + \"\\n\" +\n    \"📌 **\" + $('Switch por Tipo').item.json.output.titulo + \"**\\n\" +\n    \"📝 \" + $('Switch por Tipo').item.json.output.descripcion + \"\\n\\n\" +\n    \"👤 Responsable: \" + ($json.userNAME || $('¿Hay Responsable?').item.json.userNAME || 'Por asignar') + \"\\n\" +\n    \"🆔 ID tarea: \" + $('Create Planner Task').item.json.id\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2160,
+        1648
+      ],
+      "id": "e0364d00-f743-44b2-b8e7-9e1c18345cff",
+      "name": "Notificar Usuario 1:1",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.microsoft.com/v1.0/planner/tasks",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  planId: \"LY1tOr8SKUqBNay8KAUlmmUAH3Ss\",\n  bucketId: \"yD84QLz5yUufFD50vAQvj2UAI0gy\",\n  title: \"[1:1] \" + $('Switch por Tipo').item.json.output.tipo + \" - \" +\n         $('Switch por Tipo').item.json.output.titulo + \" (\" +\n         $('Switch por Tipo').item.json.output.solicitante + \")\",\n  assignments: $json.userID ? {\n    [$json.userID]: {\n      \"@odata.type\": \"#microsoft.graph.plannerAssignment\",\n      orderHint: \" !\"\n    }\n  } : {}\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1728,
+        1504
+      ],
+      "id": "0fef5bd2-e78a-4aea-bb6e-1bbbe3479a04",
+      "name": "Create Planner Task",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "amDNYM3DRrd2H1JM",
+          "name": "Microsoft account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r0000001-0001-0001-0001-000000000011",
+              "name": "userNAME",
+              "value": "Administrador DAPPS",
+              "type": "string"
+            },
+            {
+              "id": "r0000001-0001-0001-0001-000000000012",
+              "name": "userEMAIL",
+              "value": "admin@dapps.com",
+              "type": "string"
+            },
+            {
+              "id": "r0000001-0001-0001-0001-000000000013",
+              "name": "userID",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1488,
+        1600
+      ],
+      "id": "3ff9ea9f-b0c1-4cdc-a5e6-9f3ec2268495",
+      "name": "Fallback Responsable"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "r0000001-0001-0001-0001-000000000010",
+              "leftValue": "={{ $json.userNAME }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1232,
+        1520
+      ],
+      "id": "cf7bbf37-8750-4175-9852-be629a968edd",
+      "name": "¿Hay Responsable?"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "GZqAb3tBTfarpPj7",
+          "mode": "list",
+          "cachedResultName": "user_cache",
+          "cachedResultUrl": "/projects/bkgisv7cczQwz4m5/datatables/GZqAb3tBTfarpPj7"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "tipo",
+              "keyValue": "={{ $json.output.tipo }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        976,
+        1600
+      ],
+      "id": "a1e425b2-c60f-4a90-a4c5-d1ef2cf6f56e",
+      "name": "Get row(s)",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const tipo = $json.output?.tipo || 'CONSULTA';\nconst metadata = {\n  INCIDENCIA:    { prioridad: 5, bucket: 'Incidencias',    etiqueta: '🔴 INCIDENCIA' },\n  REQUERIMIENTO: { prioridad: 3, bucket: 'Requerimientos', etiqueta: '🟡 REQUERIMIENTO' },\n  CONSULTA:      { prioridad: 1, bucket: 'Consultas',      etiqueta: '🔵 CONSULTA' },\n};\nconst meta = metadata[tipo] || { prioridad: 1, bucket: 'General', etiqueta: '⚪ ' + tipo };\nreturn [{ json: { ...$json, meta } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        1600
+      ],
+      "id": "615dc2d7-bc1c-4bc9-8072-45c6467129d5",
+      "name": "Set Metadata por Tipo"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "r0000001-0001-0001-0001-000000000001",
+                    "leftValue": "={{ $json.output.tipo }}",
+                    "rightValue": "INCIDENCIA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "r0000001-0001-0001-0001-000000000002",
+                    "leftValue": "={{ $json.output.tipo }}",
+                    "rightValue": "REQUERIMIENTO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "r0000001-0001-0001-0001-000000000003",
+                    "leftValue": "={{ $json.output.tipo }}",
+                    "rightValue": "CONSULTA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "r0000001-0001-0001-0001-000000000004",
+                    "leftValue": "={{ $json.output.tipo }}",
+                    "rightValue": "IGNORAR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        512,
+        1664
+      ],
+      "id": "476e9102-1ba8-4073-856b-73a15d43faf6",
+      "name": "Switch por Tipo"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst output = item.json.output || {};\nconst input_data = item.json;\nconst TIPOS = ['INCIDENCIA','REQUERIMIENTO','CONSULTA','IGNORAR'];\nlet tipo = String(output.tipo || '').trim().toUpperCase();\nif (!TIPOS.includes(tipo)) tipo = 'IGNORAR';\nconst titulo = String(output.titulo || 'Sin título').trim().substring(0, 60);\nconst descripcion = String(output.descripcion || 'Sin descripción').trim();\nconst solicitante_nombre = String(output.solicitante || input_data.solicitante?.nombre || 'Desconocido').trim();\nconst crear_tarea = ['INCIDENCIA', 'REQUERIMIENTO'].includes(tipo);\n\nreturn [{\n  json: {\n    ...item.json,\n    output: {\n      tipo,\n      titulo,\n      descripcion,\n      solicitante: solicitante_nombre,\n      crear_tarea\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        1568
+      ],
+      "id": "1eb0a64f-d519-4360-a6cc-a10dd59c15b1",
+      "name": "Validar Output IA"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"tipo\": {\n      \"type\": \"string\",\n      \"enum\": [\"INCIDENCIA\", \"REQUERIMIENTO\", \"CONSULTA\", \"IGNORAR\"]\n    },\n    \"titulo\": {\n      \"type\": \"string\"\n    },\n    \"descripcion\": {\n      \"type\": \"string\"\n    },\n    \"crear_tarea\": {\n      \"type\": \"boolean\"\n    },\n    \"solicitante\": {\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\n    \"tipo\",\n    \"titulo\",\n    \"descripcion\",\n    \"crear_tarea\",\n    \"solicitante\"\n  ]\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        2336
+      ],
+      "id": "fc417ff1-614e-4e2b-b6fb-afbc349d18ff",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4.1-mini-workflow",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        2304
+      ],
+      "id": "814fbd3d-af8e-41c8-8fdd-1a3b84246a98",
+      "name": "Azure OpenAI Chat Model",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "mLx7x8NOGixRRV4R",
+          "name": "Azure Open AI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a deterministic enterprise workflow classification engine.\n\nYour task is to analyze a Microsoft Teams message written in Spanish and classify it strictly into ONE category.\n\nINPUT:\n\nMESSAGE:\n{{ $json.mensaje }}\n\nSENDER:\n{{ $json.solicitante.nombre }}\n\nCATEGORIES (choose EXACTLY ONE):\n\nINCIDENCIA\nA reported malfunction, error, failure, outage, or access problem.\n\nREQUERIMIENTO\nA request to perform an action, grant access, configure something, modify something, or create a new task.\n\nCONSULTA\nA request for information, clarification, or status update that does not describe a malfunction.\n\nIGNORAR\nNon-actionable messages such as greetings, thanks, confirmations, emojis, reactions, empty messages, or informal conversation without operational relevance.\n\nSTRICT CLASSIFICATION RULES:\n\nChoose EXACTLY ONE category.\n\nDo NOT infer information not explicitly present.\n\nIf something is described as not working → INCIDENCIA.\n\nIf the user requests an action → REQUERIMIENTO.\n\nIf the message is only a question → CONSULTA.\n\nIf the message is a greeting, acknowledgment, short confirmation, or contains no operational intent → IGNORAR.\n\nIf the message is too short and lacks actionable context → IGNORAR.\n\nIf both malfunction and request appear → prioritize INCIDENCIA.\n\nBe deterministic and literal. Avoid assumptions.\n\nOUTPUT RULES:\n\nReturn ONLY valid JSON.\n\nNo explanations.\n\nNo markdown.\n\nNo reasoning.\n\nNo extra text.\n\nThe JSON response MUST follow EXACTLY this structure:\n\n{\n\"tipo\": \"INCIDENCIA | REQUERIMIENTO | CONSULTA | IGNORAR\",\n\"titulo\": \"Short descriptive title (max 60 characters)\",\n\"descripcion\": \"Clear and concise summary of the message\",\n\"crear_tarea\": true | false,\n\"solicitante\": \"Exact sender full name\"\n}\n\nRules for crear_tarea:\n\nSet true ONLY if tipo is INCIDENCIA or REQUERIMIENTO.\n\nSet false if tipo is CONSULTA or IGNORAR.\n\n\"solicitante\" MUST exactly match the provided SENDER value.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -64,
+        2048
+      ],
+      "id": "6531c4c2-3dbb-455c-bd2a-fe99ddfb5458",
+      "name": "AI Agent Clasificador",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst body = item.body || item;\n\n// Validar campos obligatorios del contrato\nconst origen = String(body.origen || '').trim();\nconst mensaje = String(body.mensaje || '').trim();\nconst solicitante = body.solicitante || {};\nconst nombre = String(solicitante.nombre || '').trim();\nconst aadObjectId = String(solicitante.aadObjectId || '').trim();\nconst email = String(solicitante.email || '').trim();\nconst conversationId = String(body.conversationId || '').trim();\nconst timestamp = String(body.timestamp || new Date().toISOString()).trim();\n\nif (!mensaje) {\n  throw new Error('Campo \"mensaje\" es obligatorio.');\n}\nif (!nombre) {\n  throw new Error('Campo \"solicitante.nombre\" es obligatorio.');\n}\n\nreturn [{\n  json: {\n    origen: origen || 'personal',\n    mensaje,\n    solicitante: {\n      nombre,\n      aadObjectId,\n      email\n    },\n    conversationId,\n    timestamp\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        2048
+      ],
+      "id": "cf789670-b169-4d72-92d0-5ef337a29d8b",
+      "name": "Validar Contrato"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "personal-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        2048
+      ],
+      "id": "f4cd7a7f-3f69-45b5-ba7c-8982d3817de5",
+      "name": "Webhook Personal Intake",
+      "webhookId": "personal-intake-001"
+    }
+  ],
+  "connections": {
+    "Create Planner Task": {
+      "main": [
+        [
+          {
+            "node": "Log Tarea Creada",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send email notification",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notificar Usuario 1:1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notificar Error al Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fallback Responsable": {
+      "main": [
+        [
+          {
+            "node": "Create Planner Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Hay Responsable?": {
+      "main": [
+        [
+          {
+            "node": "Create Planner Task",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fallback Responsable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "¿Hay Responsable?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notificar Error al Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Metadata por Tipo": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch por Tipo": {
+      "main": [
+        [
+          {
+            "node": "Respond INCIDENCIA",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set Metadata por Tipo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond REQUERIMIENTO",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Requerimiento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond CONSULTA",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Consulta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond IGNORAR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Output IA": {
+      "main": [
+        [
+          {
+            "node": "Switch por Tipo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent Clasificador",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent Clasificador",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent Clasificador": {
+      "main": [
+        [
+          {
+            "node": "Validar Output IA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notificar Error al Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Contrato": {
+      "main": [
+        [
+          {
+            "node": "AI Agent Clasificador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Personal Intake": {
+      "main": [
+        [
+          {
+            "node": "Validar Contrato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4ea52147ff2b8b6cedbd49a62f2df2dc6944dde8b57fbebbe4f69a5976fe2a20"
+  }
+}
